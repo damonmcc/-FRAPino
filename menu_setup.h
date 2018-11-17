@@ -31,6 +31,7 @@ char* constMEM hexDigit MEMMODE="0123456789ABCDEF";
 char* constMEM hexNr[] MEMMODE={"0","x",hexDigit,hexDigit};
 char buf1[]="0x11";
 result runFRAP(eventMask e, prompt &item);
+result runPEEK(eventMask e, prompt &item);
 
 // Custom menu item to choose parameter settings
 class confirmParams:public menu {
@@ -62,17 +63,25 @@ MENU(paramsBaseline, "BaseLine Params.",doNothing,noEvent,wrapStyle
 
 // Paramater menu for High Power Led (HI_LED)
 MENU(paramsHPLED, "HP-LED Params.",doNothing,noEvent,wrapStyle
-	,altFIELD(cancelField,HPcount,"#ofPulse:","",0,100,10,1,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+	,altFIELD(cancelField,HPcount,"#ofPulse:","",0,10000,100,10,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
   ,EXIT("<Exit")
   ,altFIELD(cancelField, HPdutyCycle,"D.Cyc:","%",0,99,10,1,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
 	,altFIELD(cancelField, HPpulseLength,"PulseLen:","us",100,6000,10,0,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
-  ,altFIELD(cancelField, HPcooldown,"Cooldwn:","us",100,6000*100,1000,100,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,altFIELD(cancelField, HPcooldown,"Cooldwn:","us",100,100000,1000,100,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+);
 
+// Paramater menu for Camera
+MENU(paramsCamera, "Camera Params.",doNothing,noEvent,wrapStyle
+  ,altFIELD(cancelField, CAMframesBase,"Base Fr:","",0,10000,10,1,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,altFIELD(cancelField, CAMframesRecov,"Recov Fr:","",0,100000,100,10,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,altFIELD(cancelField, CAMexposure,"Exp:0.0","",1,1000,10,1,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,EXIT("<Exit")
 );
 
 // altMenu for starting FRAP
 altMENU(confirmFRAP, frapMenu," Start FRAP?",doNothing,noEvent,wrapStyle,(Menu::_menuData|Menu::_canNav)
   ,OP("Yes!", runFRAP,enterEvent)
+  ,OP("PEEK!", runPEEK,enterEvent)
   ,EXIT("<Cancel surgery")
 );
 // altMenu for non-default parameter choices & FRAP starting
@@ -81,6 +90,7 @@ altMENU(confirmParams, paramMenu," Parameters",doNothing,noEvent,wrapStyle,(Menu
 	,SUBMENU(paramsHPLED)
   ,EXIT("<Exit")
   ,SUBMENU(frapMenu)
+  ,SUBMENU(paramsCamera)
   ,SUBMENU(paramsBaseline)
 );
 
@@ -114,18 +124,53 @@ NAVROOT(nav,mainMenu1,MAX_DEPTH,serial,out);//the navigation root object
 
 
 result runFRAP(eventMask e, prompt &item) {
-  baselineON();
   // capture((1000*baselineWindow)/(int)CAMpulseLength);
   // Frames based on 0.03219, or ~31 FPS
   // 1864 frames -> 59.94 seconds
-  capture(10);
-  baselineOFF();
-  burst(HPcount);
-  waitMicro(HPcooldown);
+  // 466 frames -> 14.99 seconds
   baselineON();
-  capture(10);
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("Baseline...");
+  capture(CAMframesBase);
+
+  lcd.setCursor(0, 1);
+  lcd.print("Cooling...");
+  waitMicro(1000000); // wait 1 second...
+
+  baselineOFF();
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("Bleach!");
+  burst(HPcount);
+  digitalWrite(PIN_HPLED, LOW);
+
+  lcd.setCursor(0, 1);
+  lcd.print("Cooling...");
+  delayMicroseconds(200000); // wait 2 seconds...
+
+  baselineON();
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("Recovery...");
+  capture(CAMframesRecov);
   baselineOFF();
   nav.doNav(upCmd);
+  return proceed;
+}
+
+// turn on HP-LED for thrice as long as the photobleach burst
+// NOTE: TURN DOWN POWER BEFORE PEEKING
+result runPEEK(eventMask e, prompt &item) {
+  digitalWrite(LED_BUILTIN, HIGH);
+  // waitMicro(HPcooldown);
+  burst(HPcount);
+  // waitMicro(HPcooldown);
+  // nav.doNav(upCmd);
+  digitalWrite(LED_BUILTIN, LOW);
   return proceed;
 }
 
@@ -145,7 +190,7 @@ void translateIR()
     nav.doNav(upCmd);
     break;
   case 0xFF22DD: Serial.println("FAST BACK");
-    nav.doNav(escCmd);
+    // nav.doNav(escCmd);
     break;
   case 0xFF02FD: Serial.println("PAUSE");
     nav.doNav(enterCmd);

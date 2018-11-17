@@ -1,6 +1,6 @@
 // Delays around HP-LED bursts
 // Units: milliseconds
-int baselineWindow = 100;  //  0.1 seconds
+int baselineWindow = 3000;  //  3 seconds
 
 // Total HP-LED trigger pulse length (ON + OFF) in us
 // 0.2 - 6 ms
@@ -11,7 +11,7 @@ float HPdutyCycle = 50;
 // Number of pulses per burst (850)
 int HPcount = 850;
 // may need 240 ms (calculated in excel)
-unsigned long HPcooldown = HPpulseLength*10;
+unsigned long HPcooldown = HPpulseLength*5;
 // Will store last time HP-LED pin was updated
 unsigned long HPledPreviousHIGHMicros = 0;
 unsigned long HPledPreviousLOWMicros = 0;
@@ -27,16 +27,19 @@ int HPledState = LOW;
 // Total pulse length (ON + OFF) in us
 // 1 - 100 Hz (FPS)
 // 1000000 - 100000 us
-// Default: 60 FPS
-// 1000000*(1/60) us
+// 60 FPS, 1000000*(1/60) us
+// 60 FPS, 1000000*(1/60) us
+float CAMexposure = 0.03219;
 float CAMpulseLength = 0.03219 * 1000000;
 // Duty cycle of pulse in %
 float CAMdutyCycle = 99;
-//  capture window after burst: 5 mins - (baseline+burst)
+//  capture window after burst: X*seconds - (baseline+burst)
 // 1*1000 = 1 second
 int captureWindow = (1*1000)-(baselineWindow + HPcount*HPpulseLength*1000);    
 // Number of frames
-int CAMframes = (1000*captureWindow)/(int) CAMpulseLength;
+// int CAMframes = (1000*captureWindow)/(int) CAMpulseLength;
+int CAMframesBase = 150;
+int CAMframesRecov = 466;
 
 // Will store last time Camera pin was updated
 unsigned long CAMPreviousHIGHMicros = 0;
