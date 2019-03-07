@@ -72,9 +72,9 @@ MENU(paramsHPLED, "HP-LED Params.",doNothing,noEvent,wrapStyle
 
 // Paramater menu for Camera
 MENU(paramsCamera, "Camera Params.",doNothing,noEvent,wrapStyle
-  ,altFIELD(cancelField, CAMframesBase,"Base Fr:","",0,10000,10,1,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
-  ,altFIELD(cancelField, CAMframesRecov,"Recov Fr:","",0,100000,100,10,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
-  ,altFIELD(cancelField, CAMexposure,"Exp:0.0","",1,1000,10,1,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,altFIELD(cancelField, CAMframesBase,"Bse Fr:","",0,200000,100,10,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,altFIELD(cancelField, CAMframesRecov,"Rcv Fr:","",0,200000,100,10,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
+  ,altFIELD(cancelField, CAMexposure,"Exp:","",0,10,0.1,0.01,doNothing,enterEvent,wrapStyle)//cancelable field (2 edit levels)
   ,EXIT("<Exit")
 );
 
@@ -128,6 +128,8 @@ result runFRAP(eventMask e, prompt &item) {
   // Frames based on 0.03219, or ~31 FPS
   // 1864 frames -> 59.94 seconds
   // 466 frames -> 14.99 seconds
+
+  // Run Baseline
   baselineON();
   lcd.clear();
   lcd.print("FRAP STEP:");
@@ -139,6 +141,7 @@ result runFRAP(eventMask e, prompt &item) {
   lcd.print("Cooling...");
   waitMicro(1000000); // wait 1 second...
 
+  // Run Bleach
   baselineOFF();
   lcd.clear();
   lcd.print("FRAP STEP:");
@@ -151,12 +154,68 @@ result runFRAP(eventMask e, prompt &item) {
   lcd.print("Cooling...");
   delayMicroseconds(200000); // wait 2 seconds...
 
+  // Run Recovery for 10 x 30 seconds
   baselineON();
   lcd.clear();
   lcd.print("FRAP STEP:");
   lcd.setCursor(0, 1);
-  lcd.print("Recovery...");
+  lcd.print("30s Recovery1...");
   capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery2...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery3...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery4...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery5...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery6...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery7...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery8...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery9...");
+  capture(CAMframesRecov);
+
+  lcd.clear();
+  lcd.print("FRAP STEP:");
+  lcd.setCursor(0, 1);
+  lcd.print("30s Recovery10...");
+  capture(CAMframesRecov);
+
   baselineOFF();
   nav.doNav(upCmd);
   return proceed;

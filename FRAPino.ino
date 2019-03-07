@@ -19,7 +19,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
   lcd.begin(16,2);
   lcd.setCursor(0, 0);
-  lcd.print("FRAPulse V0.1");
+  lcd.print("FRAPino V0.2");
   lcd.setCursor(0, 1);
   lcd.print("__|_|_|_|______");
   delay(2000);

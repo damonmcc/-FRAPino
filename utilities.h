@@ -29,17 +29,17 @@ int HPledState = LOW;
 // 1000000 - 100000 us
 // 60 FPS, 1000000*(1/60) us
 // 60 FPS, 1000000*(1/60) us
-float CAMexposure = 0.03219;
-float CAMpulseLength = 0.03219 * 1000000;
+float CAMexposure = 0.001;
+float CAMpulseLength = 0.001 * 1000000;
 // Duty cycle of pulse in %
 float CAMdutyCycle = 99;
-//  capture window after burst: X*seconds - (baseline+burst)
+// non-imaging window after burst: X*seconds - (baseline+burst)
 // 1*1000 = 1 second
 int captureWindow = (1*1000)-(baselineWindow + HPcount*HPpulseLength*1000);    
 // Number of frames
 // int CAMframes = (1000*captureWindow)/(int) CAMpulseLength;
-int CAMframesBase = 150;
-int CAMframesRecov = 466;
+int CAMframesBase = 30000;
+int CAMframesRecov = 30000;
 
 // Will store last time Camera pin was updated
 unsigned long CAMPreviousHIGHMicros = 0;
